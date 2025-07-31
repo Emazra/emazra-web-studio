@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Website Templates</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <link href="assets/css/products.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">Emazra</a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+    <div id="listingPage">
+        <div class="filters" id="filtersContainer">
+            <button class="filter-btn active" data-tag="all">All Templates</button>
+        </div>
+        
+        <div class="products-grid" id="productsGrid">
+            <div class="loading">Loading templates...</div>
+        </div>
+    </div>
+
+    <div id="productDetailPage" class="product-detail-container">
+        <a href="#" class="back-btn" id="backToList">
+            <i class="fas fa-arrow-left"></i> Back to Templates
+        </a>
+        
+        <div class="product-detail" id="productDetail">
+            <div class="detail-header">
+                <div class="image-section">
+                    <div class="main-image-container">
+                        <div class="main-image-wrapper">
+                            <img src="" alt="Main template image" class="main-image" id="mainImage">
+                        </div>
+                        <div class="zoom-controls">
+                            <button class="zoom-control" id="zoomInBtn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="zoom-control" id="zoomOutBtn">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="zoom-control" id="resetZoomBtn">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="thumbnail-container">
+                        <div class="detail-images" id="detailImages"></div>
+                        <div class="scroll-indicator left" id="scrollLeftBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </div>
+                        <div class="scroll-indicator right" id="scrollRightBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="demo-credentials-container">
+                        <div class="credentials-section">
+                            <div class="detail-section-title">Demo Credentials</div>
+                            <div class="credentials-grid" id="credentialsContainer">
+                                <div class="no-data">No credentials available</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-info">
+                    <div class="detail-info-content">
+                        <h1 class="detail-title" id="detailTitle">Template Title</h1>
+                        
+                        <div class="detail-price" id="detailPrice">
+                            <p class="no-data">Price not specified</p>
+                        </div>
+                        
+                        <div class="detail-section-title">Tags</div>
+                        <div class="detail-tags" id="detailTags">
+                            <p class="no-data">No tags available</p>
+                        </div>
+                        
+                        <div class="detail-section-title">Description</div>
+                        <div class="detail-description" id="detailDescription">
+                            <p class="no-data">No description available</p>
+                        </div>
+                        
+                        <div class="demo-links-section">
+                            <div class="detail-section-title">Demo Links</div>
+                            <div class="detail-buttons" id="demoLinksContainer">
+                                <p class="no-data" id="noDemoLinks">No demo links available</p>
+                            </div>
+                        </div>
+
+                        <div class="mobile-credentials-section">
+                            <div class="detail-section-title">Demo Credentials</div>
+                            <div class="credentials-grid" id="mobileCredentialsContainer">
+                                <div class="no-data">No credentials available</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+    
+    <div class="lightbox-modal" id="lightboxModal">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <div class="image-counter" id="imageCounter">1/5</div>
+        
+        <div class="lightbox-nav">
+            <div class="nav-arrow" id="prevImage">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="nav-arrow" id="nextImage">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+        
+        <div class="lightbox-content">
+            <div class="lightbox-img-wrapper">
+                <img src="" alt="Enlarged template image" class="lightbox-img" id="lightboxImage">
+            </div>
+            <div class="lightbox-controls">
+                <button class="lightbox-control" id="lightboxZoomIn">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="lightbox-control" id="lightboxZoomOut">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="lightbox-control" id="lightboxReset">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script src="assets/js/products.js"></script>
+</body>
+</html>

@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emazra QuoteX</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/assets/css/price-calculator.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Emazra QuoteX</h1>
+            <p>Emazra QuoteX Calculate Website Development and hosting costs</p>
+            
+            <div class="tabs-container">
+                <button class="tab-switch active" data-tab="calculator">
+                    <i class="fas fa-calculator"></i> Quote Generator
+                </button>
+                <button class="tab-switch" data-tab="admin">
+                    <i class="fas fa-lock"></i> Management Console
+                </button>
+            </div>
+        </header>
+        
+        <!-- Calculator Tab -->
+        <div class="tab-content active" id="calculator-tab">
+            <div class="calculator-card">
+                <div class="card-header">
+                    <h2>Website Package Builder</h2>
+                </div>
+                
+                <div class="card-body">
+                    <div class="calculator-grid">
+                        <div>
+                            <div class="section">
+                                <h3 class="section-title"><i class="fas fa-laptop-code"></i> Website Details</h3>
+                                <div class="form-group">
+                                    <label for="website-price">Website Price (QR)</label>
+                                    <input type="number" id="website-price" value="0" min="0">
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <h3 class="section-title"><i class="fas fa-server"></i> Setup & Hosting Package</h3>
+                                <div class="form-group">
+                                    <label>Select Package</label>
+                                    <div class="hosting-plans" id="packages-container">
+                                        <!-- Packages will be loaded dynamically -->
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Billing Cycle</label>
+                                    <div class="radio-group">
+                                        <div class="radio-option">
+                                            <input type="radio" id="monthly" name="billing-cycle" value="monthly" checked>
+                                            <label for="monthly">Monthly</label>
+                                        </div>
+                                        <div class="radio-option">
+                                            <input type="radio" id="annually" name="billing-cycle" value="annually">
+                                            <label for="annually">Annually</label>
+                                        </div>
+                                        <div class="radio-option">
+                                            <input type="radio" id="onetime" name="billing-cycle" value="onetime">
+                                            <label for="onetime">One-Time</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <h3 class="section-title"><i class="fas fa-cogs"></i> Addons</h3>
+                                <div class="checkbox-group" id="addons-container">
+                                    <!-- Addons will be loaded dynamically -->
+                                </div>
+                            </div>
+                            
+                            <button id="calculate-btn" class="btn btn-block">
+                                <i class="fas fa-calculator"></i> Calculate Total Cost
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <div class="results" id="results">
+                                <h3 class="section-title"><i class="fas fa-file-invoice-dollar"></i> Cost Breakdown</h3>
+                                
+                                <div class="result-item">
+                                    <span class="result-label">Website Price:</span>
+                                    <span class="result-value" id="result-website-price">0 QR</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Package Cost:</span>
+                                    <span class="result-value" id="result-package">0 QR</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Addons:</span>
+                                    <span class="result-value" id="result-addons">0 QR</span>
+                                </div>
+                                
+                                <div class="result-item total">
+                                    <span class="result-label">Total Cost:</span>
+                                    <span class="result-value" id="result-total">0 QR</span>
+                                </div>
+                                
+                                <div class="renewal-section">
+                                    <h4 class="renewal-title"><i class="fas fa-sync-alt"></i> Renewal Information</h4>
+                                    <div class="result-item">
+                                        <span class="result-label">Monthly Renewal:</span>
+                                        <span class="result-value" id="result-monthly-renewal">0 QR</span>
+                                    </div>
+                                    <div class="result-item">
+                                        <span class="result-label">Annual Renewal:</span>
+                                        <span class="result-value" id="result-annual-renewal">0 QR</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="client-name">Client Name</label>
+                                    <input type="text" id="client-name" placeholder="Enter client name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="client-email">Email</label>
+                                    <input type="email" id="client-email" placeholder="Enter client email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="client-phone">Phone</label>
+                                    <input type="tel" id="client-phone" placeholder="Enter client phone">
+                                </div>
+                                <div class="form-group">
+                                    <label for="payment-status">Payment Status</label>
+                                    <select id="payment-status">
+                                        <option value="pending">Pending</option>
+                                        <option value="paid">Paid</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="invoice-number">Invoice Number</label>
+                                    <input type="text" id="invoice-number" value="INV-2023-001">
+                                </div>
+                                
+                                <button id="generate-invoice" class="btn btn-success btn-block">
+                                    <i class="fas fa-file-invoice"></i> Generate Invoice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Panel Tab -->
+        <div class="tab-content" id="admin-tab">
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>Admin Panel - Pricing Management</h2>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tabs-container">
+                        <button class="tab-switch active" data-admin-tab="packages">
+                            <i class="fas fa-box"></i> Packages
+                        </button>
+                        <button class="tab-switch" data-admin-tab="addons">
+                            <i class="fas fa-plus-circle"></i> Addons
+                        </button>
+                        <button class="tab-switch" data-admin-tab="settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </div>
+                    
+                    <!-- Packages Admin -->
+                    <div class="admin-tab-content active" id="packages-tab">
+                        <h3 class="section-title"><i class="fas fa-box"></i> Manage Packages</h3>
+                        
+                        <form id="package-form" class="admin-form">
+                            <input type="hidden" id="package-id">
+                            
+                            <div class="form-group">
+                                <label for="package-name">Package Name</label>
+                                <input type="text" id="package-name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-setup">Setup Fee (QR)</label>
+                                <input type="number" id="package-setup" required min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-monthly-domain">Monthly Domain Cost (QR)</label>
+                                <input type="number" id="package-monthly-domain" required min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-monthly-hosting">Monthly Hosting Cost (QR)</label>
+                                <input type="number" id="package-monthly-hosting" required min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-annual-domain">Annual Domain Cost (QR)</label>
+                                <input type="number" id="package-annual-domain" required min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-annual-hosting">Annual Hosting Cost (QR)</label>
+                                <input type="number" id="package-annual-hosting" required min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="package-onetime">One-Time Fee (QR)</label>
+                                <input type="number" id="package-onetime" required min="0">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Package
+                                </button>
+                                <button type="button" class="btn btn-outline" id="reset-package">
+                                    <i class="fas fa-times"></i> Clear Form
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="package-list">
+                            <h3 class="section-title"><i class="fas fa-list"></i> Existing Packages</h3>
+                            <div id="packages-list" class="sortable-list"></div>
+                            
+                            <div class="list-item-header">
+                                <div style="flex: 2">Package Name</div>
+                                <div>Setup Fee</div>
+                                <div>Actions</div>
+                            </div>
+                            
+                            <div id="packages-list">
+                                <!-- Packages will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Addons Admin -->
+                    <div class="admin-tab-content" id="addons-tab">
+                        <h3 class="section-title"><i class="fas fa-plus-circle"></i> Manage Addons</h3>
+                        
+                        <form id="addon-form" class="admin-form">
+                            <input type="hidden" id="addon-id">
+                            
+                            <div class="form-group">
+                                <label for="addon-name">Addon Name</label>
+                                <input type="text" id="addon-name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="addon-price">Price (QR)</label>
+                                <input type="number" id="addon-price" required min="0">
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="addon-description">Description</label>
+                                <textarea id="addon-description" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Addon
+                                </button>
+                                <button type="button" class="btn btn-outline" id="reset-addon">
+                                    <i class="fas fa-times"></i> Clear Form
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="addon-list">
+                            <h3 class="section-title"><i class="fas fa-list"></i> Existing Addons</h3>
+                            <div id="addons-list" class="sortable-list"></div>
+                            
+                            <div class="list-item-header">
+                                <div style="flex: 2">Addon Name</div>
+                                <div>Price</div>
+                                <div>Actions</div>
+                            </div>
+                            
+                            <div id="addons-list">
+                                <!-- Addons will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Admin -->
+                    <div class="admin-tab-content" id="settings-tab">
+                        <h3 class="section-title"><i class="fas fa-cog"></i> System Settings</h3>
+                        
+                        <form id="settings-form" class="admin-form">
+                            <div class="form-group">
+                                <label for="company-name">Company Name</label>
+                                <input type="text" id="company-name" value="EMAZRA Websites" required>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="invoice-footer">Invoice Footer Text</label>
+                                <textarea id="invoice-footer" rows="3">Thank you for your business. All payments are due within 30 days.</textarea>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Emazra QuoteX | Professional Website Pricing & Development Solutions</p>
+        </footer>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div class="invoice-modal" id="invoice-modal">
+        <div class="invoice-content" id="invoice-content">
+            <span class="close-modal">&times;</span>
+            <div class="invoice-header">
+                <div class="invoice-logo">EMAZRA</div>
+                <h2>Website Development Invoice</h2>
+                <p>Date: <span id="invoice-date"></span></p>
+            </div>
+            
+            <div class="invoice-details">
+                <div>
+                    <h3>Client Information</h3>
+                    <p>Client Name: <span id="invoice-client-name"></span></p>
+                    <p>Email: <span id="invoice-client-email"></span></p>
+                    <p>Phone: <span id="invoice-client-phone"></span></p>
+                </div>
+                <div>
+                    <h3>Invoice Details</h3>
+                    <p>Invoice #: <span id="invoice-number-display"></span></p>
+                    <p>Date: <span id="invoice-date-2"></span></p>
+                    <p>Status: <span id="invoice-status"></span></p>
+                </div>
+            </div>
+            
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Price (QR)</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items">
+                    <!-- Invoice items will be generated here -->
+                </tbody>
+            </table>
+            
+            <div class="invoice-total">
+                Total: <span id="invoice-total">0.00</span> QR
+            </div>
+            
+            <div class="invoice-actions">
+                <button class="btn btn-success btn-block" id="download-invoice">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Firebase configuration
+    const firebaseConfig = {
+        projectId: "emazra-websites"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // DOM Elements
+    const tabSwitches = document.querySelectorAll('.tab-switch');
+    const calculatorTab = document.getElementById('calculator-tab');
+    const adminTab = document.getElementById('admin-tab');
+    const adminTabSwitches = document.querySelectorAll('[data-admin-tab]');
+    const adminTabContents = document.querySelectorAll('.admin-tab-content');
+    const invoiceModal = document.getElementById('invoice-modal');
+    const closeModal = document.querySelector('.close-modal');
+    
+    // Firestore collections
+    const packagesRef = db.collection('packages');
+    const addonsRef = db.collection('addons');
+    const settingsRef = db.collection('settings').doc('pricingSettings');
+    
+    // Current data
+    let packages = [];
+    let addons = [];
+    let settings = {
+        companyName: "EMAZRA Websites",
+        invoiceFooter: "Thank you for your business. All payments are due within 30 days."
+    };
+    
+    // Initialize the app
+    function initApp() {
+        // Initialize with current date
+        const now = new Date();
+        const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+        document.getElementById('invoice-date').textContent = dateStr;
+        document.getElementById('invoice-date-2').textContent = dateStr;
+        document.getElementById('download-invoice').addEventListener('click', downloadInvoiceAsPDF);
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Load data from Firestore
+        Promise.all([
+            loadPackages(),
+            loadAddons(),
+            loadSettings()
+        ]).then(() => {
+            // Initialize drag and drop after loading data
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js';
+            script.onload = initDragAndDrop;
+            document.head.appendChild(script);
+        }).catch(error => {
+            console.error("Error loading data:", error);
+        });
+    }
+
+    // Add this new function:
+function downloadInvoiceAsPDF() {
+    const { jsPDF } = window.jspdf;
+    const invoiceContent = document.getElementById('invoice-content');
+
+    // Temporarily hide UI elements
+    const closeBtn = document.querySelector('.close-modal');
+    const actions = document.querySelector('.invoice-actions');
+    closeBtn.style.display = 'none';
+    actions.style.display = 'none';
+
+    html2canvas(invoiceContent, {
+        scale: 2, // Balanced quality
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff' // Force white background to avoid transparency bloat
+    }).then(canvas => {
+        // Compress PNG: reduce data URL size by drawing at a controlled scale
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4', true); // 'true' = use compression
+        const imgWidth = 210;
+        const pageHeight = 295;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
+            heightLeft -= pageHeight;
+        }
+
+        // Restore hidden UI
+        closeBtn.style.display = '';
+        actions.style.display = '';
+
+        const invoiceNumber = document.getElementById('invoice-number-display').textContent.trim();
+        pdf.save(`invoice_${invoiceNumber}.pdf`);
+    });
+}
+
+    
+    // Load packages from Firestore
+    function loadPackages() {
+        return packagesRef.get().then((querySnapshot) => {
+            packages = [];
+            querySnapshot.forEach((doc) => {
+                const packageData = doc.data();
+                packageData.id = doc.id;
+                packages.push(packageData);
+            });
+            renderPackages();
+            renderPackageList();
+        }).catch((error) => {
+            console.error("Error loading packages: ", error);
+        });
+    }
+    
+    // Load addons from Firestore
+    function loadAddons() {
+        return addonsRef.get().then((querySnapshot) => {
+            addons = [];
+            querySnapshot.forEach((doc) => {
+                const addonData = doc.data();
+                addonData.id = doc.id;
+                addons.push(addonData);
+            });
+            renderAddons();
+            renderAddonList();
+        }).catch((error) => {
+            console.error("Error loading addons: ", error);
+        });
+    }
+    
+    // Load settings from Firestore
+    function loadSettings() {
+        return settingsRef.get().then((doc) => {
+            if (doc.exists) {
+                settings = doc.data();
+                renderSettings();
+            }
+        }).catch((error) => {
+            console.error("Error loading settings: ", error);
+        });
+    }
+    
+    // Render packages in calculator
+    function renderPackages() {
+    const container = document.getElementById('packages-container');
+    container.innerHTML = '';
+    
+    // Sort packages by order before rendering
+    packages.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    packages.forEach((pkg) => {
+        const plan = document.createElement('div');
+        plan.className = 'hosting-plan';
+        plan.innerHTML = `
+            <input type="radio" id="${pkg.id}" name="package" value="${pkg.id}" ${packages.length === 1 ? 'checked' : ''}>
+            <label for="${pkg.id}">
+                <div class="plan-name">${pkg.name}</div>
+                <div class="plan-price">${pkg.setupFee} QR</div>
+                <div class="plan-period">Setup Fee</div>
+            </label>
+        `;
+        container.appendChild(plan);
+    });
+}
+    
+    // Render addons in calculator
+    function renderAddons() {
+    const container = document.getElementById('addons-container');
+    container.innerHTML = '';
+    
+    // Sort addons by order before rendering
+    addons.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    addons.forEach((addon) => {
+        const option = document.createElement('div');
+        option.className = 'checkbox-option';
+        option.innerHTML = `
+            <input type="checkbox" id="${addon.id}" value="${addon.price}">
+            <label for="${addon.id}">${addon.name} <span class="addon-price">${addon.price} QR</span></label>
+        `;
+        container.appendChild(option);
+    });
+}
+
+    // Initialize drag and drop functionality
+    function initDragAndDrop() {
+    // Packages drag and drop
+    const packagesList = document.getElementById('packages-list');
+    if (packagesList) {
+        new Sortable(packagesList, {
+            animation: 150,
+            ghostClass: 'dragging',  // Single class name
+            chosenClass: 'dragging', // Single class name
+            dragClass: 'dragging',   // Single class name
+            handle: '.sortable-item',
+            onEnd: async function() {
+                await updatePackageOrder();
+            }
+        });
+    }
+
+        // Addons drag and drop
+        const addonsList = document.getElementById('addons-list');
+    if (addonsList) {
+        new Sortable(addonsList, {
+            animation: 150,
+            ghostClass: 'dragging',  // Single class name
+            chosenClass: 'dragging', // Single class name
+            dragClass: 'dragging',   // Single class name
+            handle: '.sortable-item',
+            onEnd: async function() {
+                await updateAddonOrder();
+            }
+        });
+    }
+}
+
+    // Update package order in Firestore
+    async function updatePackageOrder() {
+    const items = document.querySelectorAll('#packages-list .sortable-item');
+    const batch = db.batch();
+    
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        const packageRef = packagesRef.doc(id);
+        batch.update(packageRef, { order: index });
+    });
+    
+    try {
+        await batch.commit();
+        // Re-render the list to show the new order
+        loadPackages();
+    } catch (error) {
+        console.error("Error updating package order:", error);
+    }
+}
+
+    // Update addon order in Firestore
+    async function updateAddonOrder() {
+    const items = document.querySelectorAll('#addons-list .sortable-item');
+    const batch = db.batch();
+    
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        const addonRef = addonsRef.doc(id);
+        batch.update(addonRef, { order: index });
+    });
+    
+    try {
+        await batch.commit();
+        // Re-render the list to show the new order
+        loadAddons();
+    } catch (error) {
+        console.error("Error updating addon order:", error);
+    }
+}
+    
+    // Render packages in admin panel
+    function renderPackageList() {
+    const container = document.getElementById('packages-list');
+    container.innerHTML = '';
+    
+    // Sort packages by order before rendering
+    packages.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    packages.forEach((pkg) => {
+        const item = document.createElement('div');
+        item.className = 'sortable-item';
+        item.dataset.id = pkg.id;
+        item.innerHTML = `
+            <div class="item-content">
+                <strong>${pkg.name}</strong>
+                <div>Monthly: ${pkg.monthlyDomain + pkg.monthlyHosting} QR | Annual: ${pkg.annualDomain + pkg.annualHosting} QR</div>
+            </div>
+            <div class="item-actions">
+                <button class="btn btn-outline edit-package" data-id="${pkg.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger delete-package" data-id="${pkg.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+    
+    // Reattach event listeners
+    setupPackageEventListeners();
+}
+
+    // Render addons in admin panel
+    function renderAddonList() {
+    const container = document.getElementById('addons-list');
+    container.innerHTML = '';
+    
+    // Sort addons by order before rendering
+    addons.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    addons.forEach((addon) => {
+        const item = document.createElement('div');
+        item.className = 'sortable-item';
+        item.dataset.id = addon.id;
+        item.innerHTML = `
+            <div class="item-content">
+                <strong>${addon.name}</strong>
+                <div>${addon.description || ''}</div>
+            </div>
+            <div class="item-actions">
+                <button class="btn btn-outline edit-addon" data-id="${addon.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger delete-addon" data-id="${addon.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+    
+    // Reattach event listeners
+    setupAddonEventListeners();
+}
+
+    function setupPackageEventListeners() {
+        document.querySelectorAll('.edit-package').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = button.dataset.id;
+                const pkg = packages.find(p => p.id === id);
+                if (pkg) {
+                    document.getElementById('package-id').value = pkg.id;
+                    document.getElementById('package-name').value = pkg.name;
+                    document.getElementById('package-setup').value = pkg.setupFee;
+                    document.getElementById('package-monthly-domain').value = pkg.monthlyDomain;
+                    document.getElementById('package-monthly-hosting').value = pkg.monthlyHosting;
+                    document.getElementById('package-annual-domain').value = pkg.annualDomain;
+                    document.getElementById('package-annual-hosting').value = pkg.annualHosting;
+                    document.getElementById('package-onetime').value = pkg.onetimeFee;
+                }
+            });
+        });
+        
+        document.querySelectorAll('.delete-package').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = button.dataset.id;
+                if (confirm('Are you sure you want to delete this package?')) {
+                    packagesRef.doc(id).delete().then(() => {
+                        loadPackages();
+                    }).catch((error) => {
+                        console.error("Error deleting package: ", error);
+                    });
+                }
+            });
+        });
+    }
+
+    function setupAddonEventListeners() {
+        document.querySelectorAll('.edit-addon').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = button.dataset.id;
+                const addon = addons.find(a => a.id === id);
+                if (addon) {
+                    document.getElementById('addon-id').value = addon.id;
+                    document.getElementById('addon-name').value = addon.name;
+                    document.getElementById('addon-price').value = addon.price;
+                    document.getElementById('addon-description').value = addon.description || '';
+                }
+            });
+        });
+            
+        document.querySelectorAll('.delete-addon').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = button.dataset.id;
+                if (confirm('Are you sure you want to delete this addon?')) {
+                    addonsRef.doc(id).delete().then(() => {
+                        loadAddons();
+                    }).catch((error) => {
+                        console.error("Error deleting addon: ", error);
+                    });
+                }
+            });
+        });
+    }
+    
+    // Render settings in admin panel
+    function renderSettings() {
+        document.getElementById('company-name').value = settings.companyName;
+        document.getElementById('invoice-footer').value = settings.invoiceFooter;
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+        // Tab switching functionality
+        tabSwitches.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                document.querySelector('.tab-switch.active').classList.remove('active');
+                tab.classList.add('active');
+                
+                // Show the correct tab content
+                if (tab.dataset.tab === 'calculator') {
+                    calculatorTab.classList.add('active');
+                    adminTab.classList.remove('active');
+                } else {
+                    calculatorTab.classList.remove('active');
+                    adminTab.classList.add('active');
+                }
+            });
+        });
+        
+        // Admin tab switching
+        adminTabSwitches.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                document.querySelector('[data-admin-tab].active').classList.remove('active');
+                tab.classList.add('active');
+                
+                // Show the correct tab content
+                adminTabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tab.dataset.adminTab}-tab`).classList.add('active');
+            });
+        });
+        
+        // Package form submission
+        document.getElementById('package-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('package-id').value;
+            const name = document.getElementById('package-name').value;
+            const setupFee = parseFloat(document.getElementById('package-setup').value);
+            const monthlyDomain = parseFloat(document.getElementById('package-monthly-domain').value);
+            const monthlyHosting = parseFloat(document.getElementById('package-monthly-hosting').value);
+            const annualDomain = parseFloat(document.getElementById('package-annual-domain').value);
+            const annualHosting = parseFloat(document.getElementById('package-annual-hosting').value);
+            const onetimeFee = parseFloat(document.getElementById('package-onetime').value);
+            
+            const packageData = {
+                name,
+                setupFee,
+                monthlyDomain,
+                monthlyHosting,
+                annualDomain,
+                annualHosting,
+                onetimeFee
+            };
+            
+            if (id) {
+                // Update existing package
+                packagesRef.doc(id).update(packageData).then(() => {
+                    loadPackages();
+                    document.getElementById('package-form').reset();
+                    document.getElementById('package-id').value = '';
+                }).catch((error) => {
+                    console.error("Error updating package: ", error);
+                });
+            } else {
+                // Add new package
+                packagesRef.add(packageData).then(() => {
+                    loadPackages();
+                    document.getElementById('package-form').reset();
+                }).catch((error) => {
+                    console.error("Error adding package: ", error);
+                });
+            }
+        });
+        
+        // Addon form submission
+        document.getElementById('addon-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('addon-id').value;
+            const name = document.getElementById('addon-name').value;
+            const price = parseFloat(document.getElementById('addon-price').value);
+            const description = document.getElementById('addon-description').value;
+            
+            const addonData = {
+                name,
+                price,
+                description
+            };
+            
+            if (id) {
+                // Update existing addon
+                addonsRef.doc(id).update(addonData).then(() => {
+                    loadAddons();
+                    document.getElementById('addon-form').reset();
+                    document.getElementById('addon-id').value = '';
+                }).catch((error) => {
+                    console.error("Error updating addon: ", error);
+                });
+            } else {
+                // Add new addon
+                addonsRef.add(addonData).then(() => {
+                    loadAddons();
+                    document.getElementById('addon-form').reset();
+                }).catch((error) => {
+                    console.error("Error adding addon: ", error);
+                });
+            }
+        });
+        
+        // Settings form submission
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const companyName = document.getElementById('company-name').value;
+            const invoiceFooter = document.getElementById('invoice-footer').value;
+            
+            const settingsData = {
+                companyName,
+                invoiceFooter
+            };
+            
+            settingsRef.set(settingsData).then(() => {
+                settings = settingsData;
+                renderSettings();
+                alert('Settings saved successfully!');
+            }).catch((error) => {
+                console.error("Error saving settings: ", error);
+            });
+        });
+        
+        // Reset package form
+        document.getElementById('reset-package').addEventListener('click', () => {
+            document.getElementById('package-form').reset();
+            document.getElementById('package-id').value = '';
+        });
+        
+        // Reset addon form
+        document.getElementById('reset-addon').addEventListener('click', () => {
+            document.getElementById('addon-form').reset();
+            document.getElementById('addon-id').value = '';
+        });
+        
+        // Calculate button
+        document.getElementById('calculate-btn').addEventListener('click', calculateTotal);
+        
+        // Generate invoice button
+        document.getElementById('generate-invoice').addEventListener('click', generateInvoice);
+        
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            invoiceModal.style.display = 'none';
+        });
+    }
+    
+    
+    // Calculate total cost
+    function calculateTotal() {
+        // Get values from inputs
+        const websitePrice = parseFloat(document.getElementById('website-price').value) || 0;
+        
+        // Get selected package
+        const selectedPackageId = document.querySelector('input[name="package"]:checked')?.value;
+        if (!selectedPackageId) {
+            alert('Please select a package');
+            return;
+        }
+        
+        const selectedPackage = packages.find(p => p.id === selectedPackageId);
+        if (!selectedPackage) return;
+        
+        const packageSetup = selectedPackage.setupFee;
+        
+        // Get selected billing cycle
+        const billingCycle = document.querySelector('input[name="billing-cycle"]:checked')?.value;
+        if (!billingCycle) {
+            alert('Please select a billing cycle');
+            return;
+        }
+        
+        // Calculate addons
+        let addonsTotal = 0;
+        const addonsCheckboxes = document.querySelectorAll('#addons-container input[type="checkbox"]:checked');
+        addonsCheckboxes.forEach(checkbox => {
+            addonsTotal += parseFloat(checkbox.value);
+        });
+        
+        // Calculate totals
+        let total = websitePrice + packageSetup + addonsTotal;
+        
+        // Calculate renewal costs
+        let monthlyRenewal = 0;
+        let annualRenewal = 0;
+        
+        if (billingCycle === 'monthly') {
+            monthlyRenewal = selectedPackage.monthlyDomain + selectedPackage.monthlyHosting;
+            annualRenewal = monthlyRenewal * 12;
+        } else if (billingCycle === 'annually') {
+            annualRenewal = selectedPackage.annualDomain + selectedPackage.annualHosting;
+            monthlyRenewal = annualRenewal / 12;
+        } else if (billingCycle === 'onetime') {
+            total += selectedPackage.onetimeFee;
+        }
+        
+// Update results display
+document.getElementById('result-website-price').textContent = `${websitePrice} QR`;
+document.getElementById('result-package').textContent = `${packageSetup} QR`;
+document.getElementById('result-addons').textContent = `${addonsTotal} QR`;
+document.getElementById('result-total').textContent = `${total} QR`;
+
+// Get the elements for monthly and annual renewal display
+const monthlyElem = document.getElementById('result-monthly-renewal');
+const annualElem = document.getElementById('result-annual-renewal');
+
+if (billingCycle === 'monthly') {
+    monthlyElem.textContent = `${monthlyRenewal.toFixed(0)} QR`;
+    annualElem.textContent = '🤷‍♀️ Who knows?';
+} else if (billingCycle === 'annually') {
+    annualElem.textContent = `${annualRenewal.toFixed(0)} QR`;
+    monthlyElem.textContent = '🤷‍♀️ Who knows?';
+} else if (billingCycle === 'onetime') {
+    monthlyElem.textContent = '💸 Nope, no charge';
+    annualElem.textContent = '💸 Nope, no charge';
+}
+
+
+    }
+    
+    // Generate invoice
+    function generateInvoice() {
+        // Get values from inputs
+        const websitePrice = parseFloat(document.getElementById('website-price').value) || 0;
+        
+        // Get selected package
+        const selectedPackageId = document.querySelector('input[name="package"]:checked')?.value;
+        if (!selectedPackageId) {
+            alert('Please select a package');
+            return;
+        }
+        
+        const selectedPackage = packages.find(p => p.id === selectedPackageId);
+        if (!selectedPackage) return;
+        
+        const packageSetup = selectedPackage.setupFee;
+        
+        // Get selected billing cycle
+        const billingCycle = document.querySelector('input[name="billing-cycle"]:checked')?.value;
+        if (!billingCycle) {
+            alert('Please select a billing cycle');
+            return;
+        }
+        
+        // Calculate addons
+        let addonsTotal = 0;
+        const addonsCheckboxes = document.querySelectorAll('#addons-container input[type="checkbox"]:checked');
+        const selectedAddons = [];
+        
+        addonsCheckboxes.forEach(checkbox => {
+            const addonPrice = parseFloat(checkbox.value);
+            addonsTotal += addonPrice;
+            
+            const addon = addons.find(a => a.id === checkbox.id);
+            if (addon) {
+                selectedAddons.push({
+                    name: addon.name,
+                    price: addonPrice
+                });
+            }
+        });
+        
+        // Calculate totals
+        let total = websitePrice + packageSetup + addonsTotal;
+        
+        if (billingCycle === 'onetime') {
+            total += selectedPackage.onetimeFee;
+        }
+        
+        // Get client details
+        const clientName = document.getElementById('client-name').value || 'N/A';
+        const clientEmail = document.getElementById('client-email').value || 'N/A';
+        const clientPhone = document.getElementById('client-phone').value || 'N/A';
+        const paymentStatus = document.getElementById('payment-status').value;
+        const invoiceNumber = document.getElementById('invoice-number').value || 'INV-2025-001';
+        
+        // Update invoice
+        updateInvoice(
+            websitePrice, 
+            packageSetup, 
+            selectedAddons, 
+            total, 
+            selectedPackage,
+            clientName,
+            clientEmail,
+            clientPhone,
+            paymentStatus,
+            invoiceNumber
+        );
+        
+        // Show modal
+        invoiceModal.style.display = 'flex';
+    }
+    
+    // Update invoice with current selections
+    function updateInvoice(
+        websitePrice, 
+        packageSetup, 
+        selectedAddons, 
+        total, 
+        selectedPackage,
+        clientName,
+        clientEmail,
+        clientPhone,
+        paymentStatus,
+        invoiceNumber
+    ) {
+        const now = new Date();
+        const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+        
+        document.getElementById('invoice-date').textContent = dateStr;
+        document.getElementById('invoice-date-2').textContent = dateStr;
+        document.getElementById('invoice-client-name').textContent = clientName;
+        document.getElementById('invoice-client-email').textContent = clientEmail;
+        document.getElementById('invoice-client-phone').textContent = clientPhone;
+        document.getElementById('invoice-number-display').textContent = invoiceNumber;
+        document.getElementById('invoice-status').textContent = paymentStatus === 'paid' ? 'Paid' : 'Pending';
+        document.getElementById('invoice-status').style.color = paymentStatus === 'paid' ? 'var(--success)' : 'var(--warning)';
+        
+        // Update invoice items
+        const invoiceItems = document.getElementById('invoice-items');
+        invoiceItems.innerHTML = '';
+        
+        // Add website development
+        if (websitePrice > 0) {
+            invoiceItems.innerHTML += `
+                <tr>
+                    <td>Website Development</td>
+                    <td>${websitePrice.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+        
+        // Add package
+        invoiceItems.innerHTML += `
+            <tr>
+                <td>${selectedPackage.name} Package Setup</td>
+                <td>${packageSetup.toFixed(2)}</td>
+            </tr>
+        `;
+        
+        // Add addons
+        selectedAddons.forEach(addon => {
+            invoiceItems.innerHTML += `
+                <tr>
+                    <td>${addon.name}</td>
+                    <td>${addon.price.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        
+        // Add one-time fee if selected
+        const billingCycle = document.querySelector('input[name="billing-cycle"]:checked')?.value;
+        if (billingCycle === 'onetime') {
+            invoiceItems.innerHTML += `
+                <tr>
+                    <td>One-Time Fee</td>
+                    <td>${selectedPackage.onetimeFee.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+        
+        document.getElementById('invoice-total').textContent = total.toFixed(2);
+    }
+    
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
