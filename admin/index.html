@@ -351,9 +351,10 @@
         }
         
         .btn-danger {
-            background: var(--warning);
-            color: white;
-        }
+    background: var(--warning); /* Ensure this color is applied */
+    color: white;
+    border: none;
+}
         
         .btn-outline {
             background: transparent;
@@ -716,16 +717,19 @@
 }
 
 .delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  font-size: 18px;
-}
-.delete-btn:hover {
-  transform: scale(1.1);
+    background: var(--warning); /* Background color for delete button */
+    color: white;
+    padding: 5px;
+    border-radius: 8px;  /* Keep the rounded corners */
+    font-size: 18px;     /* Adjust the font size */
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
+.delete-btn:hover {
+    transform: scale(1.1);
+    background: var(--primary); /* Change background color on hover */
+}
 
 /* Modal Popup */
 .modal {
