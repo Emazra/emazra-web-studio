@@ -191,7 +191,7 @@
             if (template.price) {
                 detailPrice.innerHTML = `$${template.price.toFixed(2)}`;
             } else {
-                detailPrice.innerHTML = '<p class="no-data">Price not specified</p>';
+                detailPrice.innerHTML = '<p class="no-data">For pricing, please contact us</p>';
             }
             
             // Tags - now above description
@@ -753,3 +753,4 @@ observer.observe(document.body, {
 
 // Also send height on window resize
 window.addEventListener('resize', sendHeightToParent);
+
