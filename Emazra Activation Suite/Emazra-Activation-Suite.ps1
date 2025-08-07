@@ -67,9 +67,9 @@ function Get-ActiveProductKey {
                 from = @(@{ collectionId = "productKeys" })
                 where = @{
                     fieldFilter = @{
-                        field = @{ fieldPath = "status" }
+                        field = @{ fieldPath = "type" }
                         op = "EQUAL"
-                        value = @{ stringValue = "active" }
+                        value = @{ stringValue = "Windows 10 Pro" }
                     }
                 }
                 limit = 1
