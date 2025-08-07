@@ -21,13 +21,11 @@ function Get-DeviceByMacAddress {
     )
     
     try {
-        # Query Firestore for devices with matching MAC address
         $firestoreUrl = "https://firestore.googleapis.com/v1/projects/$($firebaseConfig.projectId)/databases/(default)/documents:runQuery"
         $headers = @{
             "Content-Type" = "application/json"
         }
         
-        # Create the structured query
         $query = @{
             structuredQuery = @{
                 from = @(@{ collectionId = $firebaseConfig.collection })
@@ -56,37 +54,22 @@ function Get-DeviceByMacAddress {
     }
 }
 
-function Get-AvailableProductKey {
+function Get-ActiveProductKey {
     try {
-        # Query Firestore for available product keys
         $firestoreUrl = "https://firestore.googleapis.com/v1/projects/$($firebaseConfig.projectId)/databases/(default)/documents:runQuery"
         $headers = @{
             "Content-Type" = "application/json"
         }
         
-        # Create the structured query to find an active Windows 10 Pro key
+        # Query for active product keys
         $query = @{
             structuredQuery = @{
                 from = @(@{ collectionId = "productKeys" })
                 where = @{
-                    compositeFilter = @{
-                        op = "AND"
-                        filters = @(
-                            @{
-                                fieldFilter = @{
-                                    field = @{ fieldPath = "status" }
-                                    op = "EQUAL"
-                                    value = @{ stringValue = "active" }
-                                }
-                            },
-                            @{
-                                fieldFilter = @{
-                                    field = @{ fieldPath = "type" }
-                                    op = "EQUAL"
-                                    value = @{ stringValue = "Windows 10 Pro" }
-                                }
-                            }
-                        )
+                    fieldFilter = @{
+                        field = @{ fieldPath = "status" }
+                        op = "EQUAL"
+                        value = @{ stringValue = "active" }
                     }
                 }
                 limit = 1
@@ -97,12 +80,15 @@ function Get-AvailableProductKey {
         $response = Invoke-RestMethod -Uri $firestoreUrl -Method Post -Headers $headers -Body $body
         
         if ($response -and $response[0].document) {
-            return $response[0].document.fields.key.stringValue
+            return @{
+                Key = $response[0].document.fields.key.stringValue
+                Type = $response[0].document.fields.type.stringValue
+            }
         }
         return $null
     }
     catch {
-        Write-Host "Firestore Error: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Firestore Product Key Error: $($_.Exception.Message)" -ForegroundColor Red
         return $null
     }
 }
@@ -313,24 +299,27 @@ function Show-ActivateScreen {
         $global:macLabel.Text = "MAC Address Status: Authorized ($mac)"
         $global:macLabel.ForeColor = $successColor
         
-        # Get an available product key
-        $script:productKey = Get-AvailableProductKey
+        # Get an active product key
+        $productKeyInfo = Get-ActiveProductKey
         
-        if (-not $script:productKey) {
-            $global:macLabel.Text = "MAC Address Status: Authorized but no keys available"
-            $global:macLabel.ForeColor = $errorColor
-            $global:activateButton.Enabled = $false
-            [System.Windows.Forms.MessageBox]::Show("This device is authorized but no product keys are currently available.", "No Keys", "OK", "Warning")
-            return
+        if ($productKeyInfo -and $productKeyInfo.Key) {
+            $script:productKey = $productKeyInfo.Key
+            $global:activateButton.Enabled = $true
+            $global:statusLabel.Text = "✅ Authorized with valid product key ($($productKeyInfo.Type))"
+            $global:statusLabel.ForeColor = $successColor
+        } else {
+            $global:statusLabel.Text = "❌ No active product keys available"
+            $global:statusLabel.ForeColor = $errorColor
+            [System.Windows.Forms.MessageBox]::Show("No active product keys available in the system.", "Error", "OK", "Error")
         }
-        
-        $global:activateButton.Enabled = $true
     }
     else {
         $global:macLabel.Text = "MAC Address Status: Unauthorized ($mac)"
         $global:macLabel.ForeColor = $errorColor
         $global:activateButton.Enabled = $false
-        [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact IMaadh with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
+        $global:statusLabel.Text = "❌ Device not authorized"
+        $global:statusLabel.ForeColor = $errorColor
+        [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact support with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
     }
 })
     
@@ -405,6 +394,13 @@ function Activate-Windows {
         return
     }
     
+    if (-not $script:productKey) {
+        $global:statusLabel.Text = "❌ No product key available"
+        $global:statusLabel.ForeColor = $errorColor
+        [System.Windows.Forms.MessageBox]::Show("No product key available for activation.", "Error", "OK", "Error")
+        return
+    }
+    
     $global:statusLabel.Text = "Starting activation process..."
     $global:statusLabel.ForeColor = $textColor
     $mainForm.Refresh()
@@ -414,7 +410,7 @@ function Activate-Windows {
         $global:statusLabel.Text = "Installing product key..."
         $mainForm.Refresh()
 
-        $installResult = Start-Process "cscript.exe" -ArgumentList "//Nologo C:\Windows\System32\slmgr.vbs /ipk $productKey" -Wait -NoNewWindow -PassThru
+        $installResult = Start-Process "cscript.exe" -ArgumentList "//Nologo C:\Windows\System32\slmgr.vbs /ipk $($script:productKey)" -Wait -NoNewWindow -PassThru
 
         if ($installResult.ExitCode -eq 0) {
             $global:statusLabel.Text = "Product key installed. Activating Windows..."
