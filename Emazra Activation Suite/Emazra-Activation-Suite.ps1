@@ -56,6 +56,57 @@ function Get-DeviceByMacAddress {
     }
 }
 
+function Get-AvailableProductKey {
+    try {
+        # Query Firestore for available product keys
+        $firestoreUrl = "https://firestore.googleapis.com/v1/projects/$($firebaseConfig.projectId)/databases/(default)/documents:runQuery"
+        $headers = @{
+            "Content-Type" = "application/json"
+        }
+        
+        # Create the structured query to find an active Windows 10 Pro key
+        $query = @{
+            structuredQuery = @{
+                from = @(@{ collectionId = "productKeys" })
+                where = @{
+                    compositeFilter = @{
+                        op = "AND"
+                        filters = @(
+                            @{
+                                fieldFilter = @{
+                                    field = @{ fieldPath = "status" }
+                                    op = "EQUAL"
+                                    value = @{ stringValue = "active" }
+                                }
+                            },
+                            @{
+                                fieldFilter = @{
+                                    field = @{ fieldPath = "type" }
+                                    op = "EQUAL"
+                                    value = @{ stringValue = "Windows 10 Pro" }
+                                }
+                            }
+                        )
+                    }
+                }
+                limit = 1
+            }
+        }
+        
+        $body = $query | ConvertTo-Json -Depth 5
+        $response = Invoke-RestMethod -Uri $firestoreUrl -Method Post -Headers $headers -Body $body
+        
+        if ($response -and $response[0].document) {
+            return $response[0].document.fields.key.stringValue
+        }
+        return $null
+    }
+    catch {
+        Write-Host "Firestore Error: $($_.Exception.Message)" -ForegroundColor Red
+        return $null
+    }
+}
+
 # Main Form
 $mainForm = New-Object System.Windows.Forms.Form
 $mainForm.Text = "Emazra Activation Suite Powered By IMaadh"
@@ -246,36 +297,42 @@ function Show-ActivateScreen {
     $checkMacBtn.FlatStyle = "Flat"
     $checkMacBtn.FlatAppearance.BorderSize = 0
     $checkMacBtn.Add_Click({
-        $mac = Get-MacAddress
-        if (-not $mac) {
-            $global:macLabel.Text = "MAC Address Status: ❌ Not Available"
+    $mac = Get-MacAddress
+    if (-not $mac) {
+        $global:macLabel.Text = "MAC Address Status: ❌ Not Available"
+        $global:macLabel.ForeColor = $errorColor
+        [System.Windows.Forms.MessageBox]::Show("Could not retrieve MAC address. Please check your network connection.", "Error", "OK", "Error")
+        return
+    }
+    
+    $stdMac = $mac -replace ":", "-"
+    
+    # Get device info from Firestore
+    $deviceDoc = Get-DeviceByMacAddress -macAddress $stdMac
+    if ($deviceDoc -and $deviceDoc.fields -and $deviceDoc.fields.status -and $deviceDoc.fields.status.stringValue -eq "active") {
+        $global:macLabel.Text = "MAC Address Status: Authorized ($mac)"
+        $global:macLabel.ForeColor = $successColor
+        
+        # Get an available product key
+        $script:productKey = Get-AvailableProductKey
+        
+        if (-not $script:productKey) {
+            $global:macLabel.Text = "MAC Address Status: Authorized but no keys available"
             $global:macLabel.ForeColor = $errorColor
-            [System.Windows.Forms.MessageBox]::Show("Could not retrieve MAC address. Please check your network connection.", "Error", "OK", "Error")
+            $global:activateButton.Enabled = $false
+            [System.Windows.Forms.MessageBox]::Show("This device is authorized but no product keys are currently available.", "No Keys", "OK", "Warning")
             return
         }
         
-        $stdMac = $mac -replace ":", "-"
-        
-        # Get device info from Firestore
-        $deviceDoc = Get-DeviceByMacAddress -macAddress $stdMac
-        if ($deviceDoc -and $deviceDoc.fields -and $deviceDoc.fields.status -and $deviceDoc.fields.status.stringValue -eq "active") {
-            $global:macLabel.Text = "MAC Address Status: Authorized ($mac)"
-            $global:macLabel.ForeColor = $successColor
-            
-            # Get product key from Firestore if available
-            if ($deviceDoc.fields.productKey -and $deviceDoc.fields.productKey.stringValue) {
-                $script:productKey = $deviceDoc.fields.productKey.stringValue
-            }
-            
-            $global:activateButton.Enabled = $true
-        }
-        else {
-            $global:macLabel.Text = "MAC Address Status: Unauthorized ($mac)"
-            $global:macLabel.ForeColor = $errorColor
-            $global:activateButton.Enabled = $false
-            [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact IMaadh with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
-        }
-    })
+        $global:activateButton.Enabled = $true
+    }
+    else {
+        $global:macLabel.Text = "MAC Address Status: Unauthorized ($mac)"
+        $global:macLabel.ForeColor = $errorColor
+        $global:activateButton.Enabled = $false
+        [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact IMaadh with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
+    }
+})
     
     # Activation Button
     $global:activateButton = New-Object System.Windows.Forms.Button
