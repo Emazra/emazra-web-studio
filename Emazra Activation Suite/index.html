@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emazra Activator Suite - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --darker: #0d1b2a;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f8961e;
+            --danger: #f72585;
+            --gray: #6c757d;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            display: none;
+            padding-top: 56px; /* Added for mobile navbar */
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 280px;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Ensure sidebar is above content */
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-nav {
+            padding: 0;
+            list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 80px); /* Added scroll for mobile */
+        }
+        
+        .sidebar-nav li {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .content-section {
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-nav li a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-nav li a i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-nav li.active a {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-nav li.active a:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent);
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 1rem; /* Reduced padding for mobile */
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem; /* Reduced padding for mobile */
+            position: fixed; /* Fixed navbar for mobile */
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999; /* Below sidebar but above content */
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 36px; /* Slightly smaller for mobile */
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            margin-bottom: 1.5rem; /* Reduced margin for mobile */
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            padding: 1rem; /* Reduced padding for mobile */
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .card-body {
+            padding: 1rem; /* Reduced padding for mobile */
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1rem; /* Reduced padding for mobile */
+        }
+        
+        .stat-card i {
+            font-size: 2rem; /* Slightly smaller for mobile */
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+        
+        .stat-card .stat-value {
+            font-size: 1.75rem; /* Slightly smaller for mobile */
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .stat-label {
+            color: var(--gray);
+            font-size: 0.85rem; /* Slightly smaller for mobile */
+        }
+        
+        .bg-primary-light {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .bg-success-light {
+            background-color: rgba(76, 201, 240, 0.1);
+        }
+        
+        .bg-warning-light {
+            background-color: rgba(248, 150, 30, 0.1);
+        }
+        
+        .bg-danger-light {
+            background-color: rgba(247, 37, 133, 0.1);
+        }
+        
+        .text-primary {
+            color: var(--primary) !important;
+        }
+        
+        .text-success {
+            color: var(--success) !important;
+        }
+        
+        .text-warning {
+            color: var(--warning) !important;
+        }
+        
+        .text-danger {
+            color: var(--danger) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--gray);
+            font-size: 0.85rem; /* Smaller font for mobile */
+        }
+        
+        .table td {
+            font-size: 0.85rem; /* Smaller font for mobile */
+        }
+        
+        .badge {
+            padding: 0.4em 0.65em; /* Slightly smaller for mobile */
+            font-weight: 500;
+            font-size: 0.75rem; /* Smaller font for mobile */
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem; /* Reduced padding for mobile */
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem; /* Slightly smaller for mobile */
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+            border-color: var(--primary);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 70px; /* Adjusted for mobile navbar */
+            right: 10px; /* Smaller margin for mobile */
+            left: 10px; /* Smaller margin for mobile */
+            z-index: 9999;
+            max-width: 100%; /* Full width on mobile */
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px; /* Slightly smaller for mobile */
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                margin-left: -280px;
+                width: 250px; /* Slightly narrower for mobile */
+            }
+            
+            .sidebar.active {
+                margin-left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem 0.75rem; /* Even more compact padding */
+            }
+            
+            /* Adjust navbar for mobile */
+            .navbar {
+                padding: 0.5rem;
+            }
+            
+            /* Compact card headers */
+            .card-header h5 {
+                font-size: 1.1rem;
+            }
+            
+            /* More compact tables */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Adjust stat cards */
+            .stat-card i {
+                font-size: 1.75rem;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            /* Adjust modal width */
+            .modal-dialog {
+                margin: 1rem auto;
+                max-width: 95%;
+            }
+            
+            /* Adjust search inputs */
+            .input-group {
+                width: 100% !important;
+                margin-top: 0.5rem;
+            }
+            
+            /* Stack action buttons in tables */
+            .table td:last-child, .table th:last-child {
+                white-space: nowrap;
+            }
+            
+            /* Make section headers more compact */
+            .content-section h4 {
+                font-size: 1.25rem;
+            }
+            
+            .content-section p.text-muted {
+                font-size: 0.9rem;
+            }
+            
+            /* Adjust user profile in navbar */
+            .user-profile div {
+                display: none; /* Hide text on small screens */
+            }
+            
+            .user-profile img {
+                margin-right: 0;
+            }
+            
+            /* Show logout icon only */
+            .user-profile .btn-outline-danger.ms-3 {
+                margin-left: 0.5rem !important;
+                padding: 0.25rem;
+            }
+            
+            .user-profile .btn-outline-danger.ms-3 i {
+                margin-right: 0;
+            }
+            
+            .user-profile .btn-outline-danger.ms-3 span {
+                display: none;
+            }
+        }
+        
+        /* Very small devices (phones, 576px and down) */
+        @media (max-width: 576px) {
+            /* Even more compact layout */
+            body {
+                padding-top: 52px;
+            }
+            
+            .main-content {
+                padding: 0.5rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .stat-card {
+                padding: 0.75rem;
+            }
+            
+            /* Stack all columns in stat cards */
+            .row > .col-md-3 {
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Adjust table cell padding */
+            .table td, .table th {
+                padding: 0.5rem;
+            }
+            
+            /* Hide some table columns on very small screens */
+            .table thead th:nth-child(4),
+            .table tbody td:nth-child(4) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Rest of your HTML remains exactly the same -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-key"></i>
+            <span>Emazra Suite</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="active">
+                <a href="#dashboard" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#devices" onclick="showSection('devices')">
+                    <i class="fas fa-laptop"></i>
+                    <span>Activated Devices</span>
+                </a>
+            </li>
+            <li>
+                <a href="#keys" onclick="showSection('keys')">
+                    <i class="fas fa-key"></i>
+                    <span>Product Keys</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <button class="btn btn-link d-lg-none" type="button" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="d-flex align-items-center ms-auto">
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=4361ee&color=fff" alt="User">
+                        <div>
+                            <div class="fw-bold">Admin</div>
+                            <small class="text-muted">Administrator</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <section id="dashboard-section" class="content-section">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="fw-bold">Dashboard</h4>
+                        <p class="text-muted">Welcome to Emazra Activator Suite Admin Panel</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-primary-light">
+                            <div class="card-body">
+                                <i class="fas fa-laptop text-primary"></i>
+                                <div class="stat-value text-primary" id="activated-devices-count">0</div>
+                                <div class="stat-label">Activated Devices</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-success-light">
+                            <div class="card-body">
+                                <i class="fas fa-key text-success"></i>
+                                <div class="stat-value text-success" id="available-keys-count">0</div>
+                                <div class="stat-label">Available Keys</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Activations</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Device</th>
+                                                <th>MAC Address</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-activations">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="devices-section" class="content-section" style="display: none;">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="fw-bold">Activated Devices</h4>
+                        <p class="text-muted">Manage all authorized devices</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-primary" onclick="showModal('addDeviceModal')">
+                            <i class="fas fa-plus me-2"></i>Add Device
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Devices</h5>
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search devices..." id="deviceSearch">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>MAC Address</th>
+                                        <th>Device Name</th>
+                                        <th>Activation Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devices-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="keys-section" class="content-section" style="display: none;">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="fw-bold">Product Keys</h4>
+                        <p class="text-muted">Manage all product keys</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-primary" onclick="showModal('addKeyModal')">
+                            <i class="fas fa-plus me-2"></i>Add Key
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Keys</h5>
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search keys..." id="keySearch">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product Key</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Added On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keys-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Device</h5>
+                    <button type="button" class="btn-close" onclick="hideModal('addDeviceModal')" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDeviceForm">
+                        <div class="mb-3">
+                            <label for="deviceMac" class="form-label">MAC Address</label>
+                            <input type="text" class="form-control" id="deviceMac" placeholder="C0:B6:F9:89:A5:44 or C0-B6-F9-89-A5-44" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deviceName" class="form-label">Device Name (Optional)</label>
+                            <input type="text" class="form-control" id="deviceName" placeholder="e.g., John's Laptop">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('addDeviceModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addDevice()">Add Device</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addKeyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Product Key</h5>
+                    <button type="button" class="btn-close" onclick="hideModal('addKeyModal')" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addKeyForm">
+                        <div class="mb-3">
+                            <label for="productKey" class="form-label">Product Key</label>
+                            <input type="text" class="form-control" id="productKey" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="keyType" class="form-label">Key Type</label>
+                            <select class="form-select" id="keyType" required>
+                                <option value="" selected disabled>Select key type</option>
+                                <option value="Windows 10 Home">Windows 10 Home</option>
+                                <option value="Windows 10 Pro">Windows 10 Pro</option>
+                                <option value="Windows 11 Home">Windows 11 Home</option>
+                                <option value="Windows 11 Pro">Windows 11 Pro</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('addKeyModal')">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addProductKey()">Add Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                Operation completed successfully!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="hideToast()"></button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAIkxPBr-NRgpT2PjsoyOoR5gSUxwWTAVQ",
+        authDomain: "emazra.com",
+        projectId: "emazra-activator-suit",
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const toast = new bootstrap.Toast(document.getElementById('successToast'));
+        
+        // Modal functions
+        function showModal(modalId) {
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        }
+
+        function hideModal(modalId) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+            if (modal) modal.hide();
+        }
+
+        function showToast(message) {
+            document.querySelector('.toast-body').textContent = message;
+            toast.show();
+        }
+
+        function hideToast() {
+            toast.hide();
+        }
+
+        // Section navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+            
+            document.querySelectorAll('.sidebar-nav li').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelector(`.sidebar-nav li a[href="#${sectionId}"]`).parentElement.classList.add('active');
+            
+            // Close sidebar on mobile after selecting a section
+            if (window.innerWidth < 992) {
+                document.querySelector('.sidebar').classList.remove('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+
+        // Data functions
+        async function loadDevices() {
+            try {
+                const snapshot = await db.collection("devices").get();
+                const devicesTable = document.getElementById('devices-table');
+                const recentTable = document.getElementById('recent-activations');
+                
+                devicesTable.innerHTML = '';
+                recentTable.innerHTML = '';
+                
+                let deviceCount = 0;
+                
+                snapshot.forEach(doc => {
+                    deviceCount++;
+                    const device = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${deviceCount}</td>
+                        <td>${device.macAddress}</td>
+                        <td>${device.deviceName || 'Unnamed Device'}</td>
+                        <td>${new Date(device.addedAt).toLocaleDateString()}</td>
+                        <td><span class="badge bg-${device.status === 'active' ? 'success' : 'danger'}">${device.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteDevice('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    devicesTable.appendChild(row);
+                    
+                    if (deviceCount <= 5) {
+                        const recentRow = document.createElement('tr');
+                        recentRow.innerHTML = `
+                            <td>${device.deviceName || 'Unnamed Device'}</td>
+                            <td>${device.macAddress}</td>
+                            <td>${new Date(device.addedAt).toLocaleDateString()}</td>
+                            <td><span class="badge bg-${device.status === 'active' ? 'success' : 'danger'}">${device.status}</span></td>
+                        `;
+                        recentTable.appendChild(recentRow);
+                    }
+                });
+                
+                document.getElementById('activated-devices-count').textContent = deviceCount;
+            } catch (error) {
+                console.error("Error loading devices: ", error);
+            }
+        }
+
+        async function loadProductKeys() {
+            try {
+                const snapshot = await db.collection("productKeys").get();
+                const keysTable = document.getElementById('keys-table');
+                
+                keysTable.innerHTML = '';
+                
+                let keyCount = 0;
+                let activeKeyCount = 0;
+                
+                snapshot.forEach(doc => {
+                    keyCount++;
+                    const key = doc.data();
+                    if (key.status === 'active') activeKeyCount++;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${keyCount}</td>
+                        <td>${key.key}</td>
+                        <td>${key.type}</td>
+                        <td><span class="badge bg-${key.status === 'active' ? 'success' : 'warning'}">${key.status}</span></td>
+                        <td>${new Date(key.addedAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteKey('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    keysTable.appendChild(row);
+                });
+                
+                document.getElementById('available-keys-count').textContent = activeKeyCount;
+            } catch (error) {
+                console.error("Error loading product keys: ", error);
+            }
+        }
+
+        async function addDevice() {
+    const macAddress = document.getElementById('deviceMac').value;
+    const deviceName = document.getElementById('deviceName').value;
+    
+    // Convert any separator (:, -, or space) to hyphens and make uppercase
+    const formattedMac = macAddress.replace(/[:\.\s-]/g, '-').toUpperCase();
+    
+    // Validate the formatted MAC address
+    if (!/^([0-9A-F]{2}[-]){5}([0-9A-F]{2})$/.test(formattedMac)) {
+        alert('Please enter a valid MAC address in format XX:XX:XX:XX:XX:XX or XX-XX-XX-XX-XX-XX');
+        return;
+    }
+    
+    try {
+        await db.collection("devices").add({
+            macAddress: formattedMac, // Use the hyphenated format
+            deviceName: deviceName || 'Unnamed Device',
+            status: 'active',
+            addedAt: new Date().toISOString()
+        });
+        
+        hideModal('addDeviceModal');
+        document.getElementById('addDeviceForm').reset();
+        showToast('Device added successfully');
+        loadDevices();
+    } catch (error) {
+        console.error("Error adding device: ", error);
+        alert('Error adding device. Please try again.');
+    }
+}
+
+        async function addProductKey() {
+            const key = document.getElementById('productKey').value;
+            const type = document.getElementById('keyType').value;
+            
+            if (!/^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$/.test(key)) {
+                alert('Please enter a valid product key in format XXXXX-XXXXX-XXXXX-XXXXX-XXXXX');
+                return;
+            }
+            
+            try {
+                await db.collection("productKeys").add({
+                    key: key,
+                    type: type,
+                    status: 'active',
+                    addedAt: new Date().toISOString()
+                });
+                
+                hideModal('addKeyModal');
+                document.getElementById('addKeyForm').reset();
+                showToast('Product key added successfully');
+                loadProductKeys();
+            } catch (error) {
+                console.error("Error adding product key: ", error);
+                alert('Error adding product key. Please try again.');
+            }
+        }
+
+    // Current user state
+    let currentUser = null;
+
+    // Main authentication check function (renamed from checkAuth to checkAuthState)
+    function checkAuthState() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                // User not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                // Get user document from Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // User document doesn't exist, logout and redirect
+                    await auth.signOut();
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Set current user data
+                currentUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    ...userDoc.data()
+                };
+                
+                // Update UI based on role
+                updateUIForRole();
+                
+                // Only now show the content
+                document.body.style.display = 'block';
+                initializeApplication();
+            } catch (error) {
+                console.error("Authentication error:", error);
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+function updateUIForRole() {
+    // Update user profile in navbar
+    const userProfile = document.querySelector('.user-profile');
+    if (currentUser) {
+        userProfile.innerHTML = `
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name || 'User')}&background=4361ee&color=fff" alt="User">
+            <div>
+                <div class="fw-bold">${currentUser.name || 'User'}</div>
+                <small class="text-muted">${currentUser.role}</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger ms-3" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        `;
+    }
+
+    // Keep the role-specific restrictions (but don't affect logout button)
+    if (currentUser && currentUser.role === 'Admin') {
+        // Hide all delete buttons (if you still want this)
+        document.querySelectorAll('.btn-outline-danger:not(.ms-3)').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        // Hide the Product Keys section (if you still want this)
+        document.querySelector('a[href="#keys"]').parentElement.style.display = 'none';
+        document.getElementById('keys-section').style.display = 'none';
+    }
+}
+
+    function logout() {
+        auth.signOut().then(() => {
+            window.location.href = 'login.html';
+        });
+    }
+
+    function initializeApplication() {
+        showSection('dashboard');
+        loadDevices();
+        loadProductKeys();
+    }
+
+    // Add permission checks to delete functions
+    async function deleteDevice(id) {
+        if (!currentUser || currentUser.role !== 'Super Admin') {
+    alert('🚫 Nice Try!\n\nYou need extra magic powers to delete that. 🪄🔮');
+    return;
+}
+        
+        if (confirm('Are you sure you want to delete this device?')) {
+            try {
+                await db.collection("devices").doc(id).delete();
+                showToast('Device deleted successfully');
+                loadDevices();
+            } catch (error) {
+                console.error("Error deleting device: ", error);
+                alert('Error deleting device. Please try again.');
+            }
+        }
+    }
+
+    async function deleteKey(id) {
+        if (!currentUser || currentUser.role !== 'Super Admin') {
+            alert('🚫 Nice Try!\n\nYou need extra magic powers to delete that. 🪄🔮 😎🛡️');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to delete this product key?')) {
+            try {
+                await db.collection("productKeys").doc(id).delete();
+                showToast('Product key deleted successfully');
+                loadProductKeys();
+            } catch (error) {
+                console.error("Error deleting product key: ", error);
+                alert('Error deleting product key. Please try again.');
+            }
+        }
+    }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.display = 'none';
+            checkAuthState();
+            showSection('dashboard');
+            loadDevices();
+            loadProductKeys();
+        });
+    </script>
+</body>
+</html>
