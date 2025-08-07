@@ -305,10 +305,10 @@ function Show-ActivateScreen {
         if ($productKeyInfo -and $productKeyInfo.Key) {
             $script:productKey = $productKeyInfo.Key
             $global:activateButton.Enabled = $true
-            $global:statusLabel.Text = "✅ Authorized with valid product key ($($productKeyInfo.Type))"
+            $global:statusLabel.Text = "Authorized with valid genuine product key - Powered by Emazra ($($productKeyInfo.Type))"
             $global:statusLabel.ForeColor = $successColor
         } else {
-            $global:statusLabel.Text = "❌ No active product keys available"
+            $global:statusLabel.Text = "No active product keys available"
             $global:statusLabel.ForeColor = $errorColor
             [System.Windows.Forms.MessageBox]::Show("No active product keys available in the system.", "Error", "OK", "Error")
         }
@@ -317,9 +317,9 @@ function Show-ActivateScreen {
         $global:macLabel.Text = "MAC Address Status: Unauthorized ($mac)"
         $global:macLabel.ForeColor = $errorColor
         $global:activateButton.Enabled = $false
-        $global:statusLabel.Text = "❌ Device not authorized"
+        $global:statusLabel.Text = "Device not authorized"
         $global:statusLabel.ForeColor = $errorColor
-        [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact support with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
+        [System.Windows.Forms.MessageBox]::Show("This device is not authorized or not active.`nPlease contact support [emazraproductions@gmail.com] with your MAC address to get approval.`nYour MAC: $mac", "Unauthorized", "OK", "Warning")
     }
 })
     
@@ -420,24 +420,24 @@ function Activate-Windows {
             $activateResult = Start-Process "cscript.exe" -ArgumentList "//Nologo C:\Windows\System32\slmgr.vbs /ato" -Wait -NoNewWindow -PassThru
             
             if ($activateResult.ExitCode -eq 0) {
-                $global:statusLabel.Text = "✅ Windows activated successfully!"
+                $global:statusLabel.Text = "Windows activated successfully! – Powered by Emazra"
                 $global:statusLabel.ForeColor = $successColor
-                [System.Windows.Forms.MessageBox]::Show("Windows has been activated successfully!", "Success", "OK", "Information")
+                [System.Windows.Forms.MessageBox]::Show("Windows has been activated successfully! – Powered by Emazra", "Success", "OK", "Information")
             }
             else {
-                $global:statusLabel.Text = "❌ Activation failed. Please check your connection."
+                $global:statusLabel.Text = "Activation failed. Please check your connection."
                 $global:statusLabel.ForeColor = $errorColor
                 [System.Windows.Forms.MessageBox]::Show("Windows activation failed. Please check your internet connection.", "Error", "OK", "Error")
             }
         }
         else {
-            $global:statusLabel.Text = "❌ Product key installation failed."
+            $global:statusLabel.Text = "Product key installation failed."
             $global:statusLabel.ForeColor = $errorColor
             [System.Windows.Forms.MessageBox]::Show("Failed to install product key.", "Error", "OK", "Error")
         }
     }
     catch {
-        $global:statusLabel.Text = "❌ Error during activation: $($_.Exception.Message)"
+        $global:statusLabel.Text = "Error during activation: $($_.Exception.Message)"
         $global:statusLabel.ForeColor = $errorColor
         [System.Windows.Forms.MessageBox]::Show("An error occurred during activation.", "Error", "OK", "Error")
     }
