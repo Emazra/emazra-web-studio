@@ -95,7 +95,7 @@ function Get-ActiveProductKey {
 
 # Main Form
 $mainForm = New-Object System.Windows.Forms.Form
-$mainForm.Text = "Emazra Activation Suite Powered By IMaadh"
+$mainForm.Text = "Emazra Activation Suite Win 10 - Powered By IMaadh"
 $mainForm.Size = New-Object System.Drawing.Size(900, 600)
 $mainForm.StartPosition = "CenterScreen"
 $mainForm.BackColor = "#2c3e50"
@@ -124,7 +124,7 @@ $headerPanel.BackColor = $primaryColor
 
 # Title Label
 $titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Text = "Emazra Activation Suite Powered By IMaadh"
+$titleLabel.Text = "Emazra Activation Suite Win 10 - Powered By IMaadh"
 $titleLabel.Font = $titleFont
 $titleLabel.ForeColor = [System.Drawing.Color]::White
 $titleLabel.AutoSize = $true
@@ -191,14 +191,14 @@ function Show-HomeAboutScreen {
     
     # Welcome Label
     $welcomeLabel = New-Object System.Windows.Forms.Label
-    $welcomeLabel.Text = "Emazra Activation Suite"
+    $welcomeLabel.Text = "Emazra Activation Suite Windows 10"
     $welcomeLabel.Font = $titleFont
     $welcomeLabel.ForeColor = $primaryColor
     $welcomeLabel.AutoSize = $true
     $welcomeLabel.Location = New-Object System.Drawing.Point(20, 20)
     
     $subtitleLabel = New-Object System.Windows.Forms.Label
-    $subtitleLabel.Text = "Professional Windows Activation Tool"
+    $subtitleLabel.Text = "Professional Windows Activation Software"
     $subtitleLabel.Font = $subtitleFont
     $subtitleLabel.ForeColor = [System.Drawing.Color]::FromArgb(189, 195, 199)
     $subtitleLabel.AutoSize = $true
@@ -215,7 +215,7 @@ function Show-HomeAboutScreen {
     
     # Developer Info
     $devLabel = New-Object System.Windows.Forms.Label
-    $devLabel.Text = "Application Developed by IMaadh`nFor support, please contact the developer"
+    $devLabel.Text = "Application Developed by IMaadh`nFor support, please contact emazraproductions@gmail.com"
     $devLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
     $devLabel.ForeColor = $primaryColor
     $devLabel.AutoSize = $true
