@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Admin Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        /* --- General Setup & Variables --- */
+        :root {
+            --primary-color: #0078d4; /* Windows Blue */
+            --background-start: #1e1e1e;
+            --background-end: #121212;
+            --card-background: #2a2a2a;
+            --text-color: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle, var(--background-start), var(--background-end));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* --- Header Section --- */
+        header {
+            margin-bottom: 40px;
+        }
+
+        .header-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            animation: pulse 2.5s infinite;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Links Container --- */
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Link Card Styling --- */
+        .link-card {
+            background: var(--card-background);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 10px 25px var(--shadow-color);
+            border-color: var(--primary-color);
+        }
+
+        .icon-style {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .link-text {
+            flex-grow: 1;
+            text-align: left;
+            margin-left: 20px;
+        }
+
+        .link-text h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .link-text p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .arrow-icon {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .link-card:hover .arrow-icon {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        /* --- Animations --- */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* --- Media Query for smaller screens --- */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            .link-card {
+                padding: 15px;
+            }
+            .link-text h2 {
+                font-size: 1rem;
+            }
+            .link-text p {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <div class="header-icon">
+                <i class="fa-brands fa-windows"></i>
+            </div>
+            <h1>Admin Panel</h1>
+            <p>Your central hub for administrative links and tools.</p>
+        </header>
+
+        <main class="links-container">
+
+            <a href="/admin/admin.html" class="link-card" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-globe icon-style"></i>
+                <div class="link-text">
+                    <h2>Web Admin</h2>
+                    <p>Maange Wesbites Templates</p>
+                </div>
+                <i class="fa-solid fa-arrow-right-long arrow-icon"></i>
+            </a>
+            
+            <a href="../src/windows.html" class="link-card" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-desktop icon-style"></i>
+                <div class="link-text">
+                    <h2>Windows Admin</h2>
+                    <p>Main administrative interface</p>
+                </div>
+                <i class="fa-solid fa-arrow-right-long arrow-icon"></i>
+            </a>
+            
+            <a href="../Emazra Activation Suite/login.html" class="link-card" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-key icon-style"></i>
+                <div class="link-text">
+                    <h2>Emazra Activation Suite</h2>
+                    <p>Activation and login portal</p>
+                </div>
+                <i class="fa-solid fa-arrow-right-long arrow-icon"></i>
+            </a>
+
+            </main>
+
+    </div>
+
+</body>
+</html>
